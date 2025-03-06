@@ -1,0 +1,23 @@
+{
+  "name": "express_notlar",
+  "version": "1.0.0",
+  "description": "Express js ogrenirken cikardigim notlardan olusan bir uygulama ",
+  "license": "ISC",
+  "author": "Umut Gedik",
+  "type": "commonjs",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "uygulamayi_ayaga_kaldir": "node app.js",
+    "uygulamayi_nodemonla_ayaga_kaldir": "nodemon app.js"
+  },
+  "dependencies": {
+    "body-parser": "^1.20.3",
+    "express": "^4.21.2",
+    "undici-types": "^6.20.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.10",
+    "nodemon": "^3.1.9"
+  }
+}
