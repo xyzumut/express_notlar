@@ -17,3 +17,9 @@ exports.urunGetir = (req, res, next) => {
     console.log('fetchall', Urun.fetchAll());
     res.redirect('/urun/urun-ekle');
 }
+
+exports.urunGetirId = (req, res, next) => {  
+    const id = req.params.id;
+    const query = req.query;
+    res.send({gonderilenID: id, query: query});
+}
