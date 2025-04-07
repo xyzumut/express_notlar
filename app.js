@@ -2,19 +2,23 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
 
-const urunRoute = require('./routes/route-urun');
-const path = require('path');
-const __rootdir = require('./utils/path');
+const UrunRoute = require('./routes/UrunRoute');
 
-app.use(bodyParser.urlencoded());
-app.use(express.static(path.join(__rootdir, 'public')));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
-app.listen(3000, () => {
+app.use((req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    next(); 
+});
 
-    app.use('/urun', urunRoute);
+app.listen(8081, () => {
+
+    app.use('/urun', UrunRoute);
 
     app.use((req, res, next) => {
-        res.status(404).sendFile(path.join(__rootdir, 'views', '404.html'));
+        res.status(404).send({ message: 'Not Found' });
     });
-
 });

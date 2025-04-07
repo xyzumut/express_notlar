@@ -1,46 +1,40 @@
-const fs = require('fs');
-const path = require('path');
-const __rootdir = require('../utils/path');
+
+const db = require('../utils/database');
 
 class Urun{
 
-    static path = path.join(__rootdir, 'data', 'urunler.json');
-    static urunler = [];
+    ad;
+    fiyat;
 
     constructor(ad, fiyat){
-        this.ad = ad;
-        this.fiyat = fiyat;
+        this.ad     = ad;
+        this.fiyat  = fiyat;
     }
 
-    save = () => {
-
-        fs.readFile(Urun.path, (err, data) => {
-
-            if(!err){
-                Urun.urunler = data.toString() === '' ? [] : JSON.parse(data);
-            }
-
-            Urun.urunler.push({ad: this.ad, fiyat: this.fiyat});
-
-            fs.writeFile(Urun.path, JSON.stringify(Urun.urunler), (err) => {
-                console.log(err);
-            });
-
-        });
+    static urunEkle = async (urun = {urun_adi, urun_fiyati}) => {
+        const result = await db.execute(
+            'INSERT INTO urunler (urun_adi, urun_fiyat) VALUES (?, ?)', 
+            [urun.urun_adi, urun.urun_fiyati]
+        );
+        return {...urun, id:result[0].insertId};
     }
 
-    static fetchAll = () => {
-        
-        try {
-            const data = fs.readFileSync(Urun.path);
-            Urun.urunler = data.toString() === '' ? [] : JSON.parse(data);
-        } 
-        catch (err) {
-            console.error(err);
-            Urun.urunler = [];
-        }
+    static urunGetir = async (id) => {
+        const queryExecute = await db.execute('SELECT * FROM urunler WHERE id = ?', [id]);
+        const result = queryExecute[0];
+        return result;
+    }
 
-        return Urun.urunler;
+    static urunleriGetir = async () => {
+        const queryExecute = await db.execute('SELECT * FROM urunler');
+        const result = queryExecute[0];
+        return result;
+    }
+
+    static urunSil = async (id) => {
+        const queryExecute = await db.execute('DELETE FROM urunler WHERE id = ?', [id]);
+        const affectedRows = queryExecute[0].affectedRows;
+        return affectedRows;
     }
 }
 

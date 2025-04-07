@@ -1,25 +1,59 @@
-const path = require('path');
-const __rootdir = require('../utils/path');
+
 const Urun = require('../models/Urun');
 
-exports.urunEkleSayfasiniRenderla = (req, res, next) => {
-    res.sendFile(path.join(__rootdir, 'views', 'urun-ekle.html'));
+class UrunController{
+
+    urunGetir = async (req, res, next) => {
+        const urunID = req.params.urunID;
+        try {
+            const result = await Urun.urunGetir(urunID);
+            if ( result.length === 0 ) {
+                res.status(404).send({ message: 'Veri Bulunamadi', data:null });
+            }
+            else{
+                res.status(200).send({ message: 'Veri Başarıyla Getirildi', data:result });
+            }
+        } 
+        catch (error) {
+            res.status(400).send({ message: error.message, result:null });
+        }
+    }
+
+    urunleriGetir = async (req, res, next) => {
+        try {
+            const result = await Urun.urunleriGetir();
+            res.status(200).send({ message: 'Veri Başarıyla Getirildi', data:result });
+        } 
+        catch (error) {
+            res.status(400).send({ message: error.message, result:null });
+        }
+    }
+    
+    urunEkle = async (req, res, next) => { 
+        try {
+            const result = await Urun.urunEkle({urun_adi:req.body.urunAdi, urun_fiyati:req.body.urunFiyati});
+            res.status(200).send({ message: 'Veri Başarıyla Eklendi', data:result });
+        } 
+        catch (error) {
+            res.status(400).send({ message: error.message, result:null });
+        }
+    }
+    
+    urunSil = async (req, res, next) => {
+        const urunID = req.params.urunID;
+        try {
+            const affectedRows = await Urun.urunSil(urunID);
+            if ( affectedRows === 0 ) {
+                res.status(404).send({ message: 'Veri Bulunamadi', data:null });
+            }
+            else{
+                res.status(200).send({ message: 'Veri Başarıyla Silindi', data:null });
+            }
+        } 
+        catch (error) {
+            res.status(400).send({ message: error.message, result:null });
+        }
+    }
 }
 
-exports.urunEkle = (req, res, next) => { 
-    const body = req.body;
-    const urun = new Urun(body.urun_adi, body.fiyat);
-    urun.save();
-    res.redirect('/urun/urun-ekle');
-}
-
-exports.urunGetir = (req, res, next) => { 
-    console.log('fetchall', Urun.fetchAll());
-    res.redirect('/urun/urun-ekle');
-}
-
-exports.urunGetirId = (req, res, next) => {  
-    const id = req.params.id;
-    const query = req.query;
-    res.send({gonderilenID: id, query: query});
-}
+module.exports = new UrunController();
