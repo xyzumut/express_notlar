@@ -5,9 +5,11 @@ const sequelize = require('./utils/database');
 
 const KitapRoute  = require('./routes/KitapRoute');
 const UserRoute = require('./routes/UserRoute');
+const YazarRoute = require('./routes/YazarRoute');
 const GenelRoute = require('./routes/GenelRoutes');
 
 const User = require('./models/User');
+const Yazar = require('./models/Yazar');
 const Kitap = require('./models/Kitap');
 
 app.use(bodyParser.json());
@@ -20,10 +22,16 @@ app.use((req, res, next) => {
     next(); 
 });
 
+//*******************************************************/
+// Modellerin birbirleriyle olan ilişkilerini tanımlıyoruz
+Yazar.hasMany(Kitap, { onDelete: 'CASCADE', foreignKey: {name:'yazarId', allowNull:false} });
+// Bir yazarın birden fazla kitabı olabilir
+Kitap.belongsTo(Yazar, { foreignKey: {name:'yazarId', allowNull:false} });
+// Bir kitabın bir yazarı olabilir
+//*******************************************************/
 
-Kitap.belongsTo(User, { foreignKey: 'userId' });
 
-sequelize.sync({alter:true, force:false})
+sequelize.sync({force:false})
     .then(() => {
         console.log('Veritabani ve tablolar oluşturuldu!');
 
@@ -31,6 +39,7 @@ sequelize.sync({alter:true, force:false})
             app.use(GenelRoute);
             app.use('/kitap', KitapRoute);
             app.use('/user', UserRoute);
+            app.use('/yazar', YazarRoute);
         
             app.use((req, res, next) => {
                 res.status(404).send({ message: 'Not Found' });

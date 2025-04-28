@@ -1,23 +1,37 @@
 const Kitap = require("../models/Kitap");
+const Yazar = require("../models/Yazar");
 
 class KitapController{
 
     kitapEkle = async (req, res) => {
-        const { kitap_adi, basim_yili, sayfa_sayisi, fiyat, img, yazar } = req.body;
+
+        const { kitap_adi, basim_yili, sayfa_sayisi, fiyat, img, yazarId } = req.body;
+
         try {
-            if (!kitap_adi || !basim_yili || !sayfa_sayisi) {
+
+            if (!kitap_adi || !basim_yili || !sayfa_sayisi || !yazarId) {
                 const error = new Error('Kitap adı, basım yılı ve sayfa sayısı boş olamaz!');
                 error.statusCode = 400;
                 throw error;
             }
-            const result = await Kitap.create({
+
+            const yazar = await Yazar.findOne({ where: { id: yazarId } });
+        
+            if (!yazar) {
+                const error = new Error('Yazar bulunamadı!');
+                error.statusCode = 404;
+                throw error;
+            }
+
+            const result = await yazar.createKitap( {
                 kitap_adi,
                 basim_yili,
                 sayfa_sayisi,
                 fiyat,
                 img,
-                yazar
-            });
+                yazarId
+            })
+            
             res.status(200).send({ data : result, message: 'Kitap Eklendi' });
         } 
         catch (error) {
@@ -26,8 +40,16 @@ class KitapController{
     }
 
     kitaplariGetir = async (req, res) => {  
-        const kitap = await Kitap.findAll();
-        res.status(200).send({ data : kitap, message: 'Kitaplar Listelendi' });
+
+        const kitaplar = await Kitap.findAll({
+            include:{ model: Yazar }
+        });
+
+        kitaplar.forEach( kitap => {
+            kitap.yazarId = undefined;
+        })
+
+        res.status(200).send({ data : kitaplar, message: 'Kitaplar Listelendi' });
     }
 
     kitapGetir = async (req, res) => {  

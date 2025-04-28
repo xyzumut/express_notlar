@@ -34,10 +34,6 @@ const Kitap = sequelize.define('kitap', {
         type:Sequalize.STRING,
         allowNull:true
     },
-    yazar:{
-        type:Sequalize.STRING,
-        allowNull:true,
-    },
 });
 
 module.exports = Kitap;
