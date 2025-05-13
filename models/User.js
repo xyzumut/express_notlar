@@ -1,6 +1,5 @@
 const Sequalize = require('sequelize');
 const sequelize = require('../utils/database');
-const e = require('express');
 
 const User = sequelize.define('user', {
     id: {

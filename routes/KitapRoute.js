@@ -9,4 +9,7 @@ router.put('/duzenle/:id', KitapController.kitapDuzenle);
 router.delete('/sil/:id', KitapController.kitapSil);
 
 
+router.post('/ekle-kategori/:id/:kategori_id', KitapController.kitapKategoriGir);
+router.delete('/sil-kategori/:id/:kategori_id', KitapController.kitapKategoriSil);
+
 module.exports = router;

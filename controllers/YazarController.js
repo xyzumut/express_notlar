@@ -1,4 +1,7 @@
+const { Op } = require("sequelize");
 const Yazar = require("../models/Yazar");
+const Kitap = require("../models/Kitap");
+const e = require("express");
 
 class YazarController {
 
@@ -23,13 +26,100 @@ class YazarController {
 
     yazarlariGetir = async (req, res) => {
         try {
-            const yazarlar = await Yazar.findAll();
-            res.status(200).send({ data: yazarlar, message: 'Yazarlar Listelendi' });
+            const orderby   = req.query.orderby || 'id';
+            const order     = req.query.order || 'ASC';
+            const limit     = parseInt(req.query.limit) || 10;
+            const search    = req.query.search || '';
+            const page      = parseInt(req.query.page) || 1;
+            const offset    = (page - 1) * limit;
+
+            const yazarlar = await Yazar.findAll({
+                include: {
+                    model: Kitap,
+                },
+                order: [[orderby, order]],
+                limit:limit,
+                offset:offset,
+                where: {
+                    [Op.or]: [
+                        { isim      : { [Op.like]: `%${search}%` } },
+                        { biyografi : { [Op.like]: `%${search}%` } },
+                    ]
+                },
+            });
+
+            const total = await Yazar.count({
+                where: {
+                    [Op.or]: [
+                        { isim      : { [Op.like]: `%${search}%` } },
+                        { biyografi : { [Op.like]: `%${search}%` } },
+                    ]
+                }
+            });
+            
+            
+            const firstPage = total === 0 ? 0 : 1;
+            const lastPage = Math.ceil(total / limit);
+
+            const meta = {
+                total       :total, 
+                page        :page, 
+                limit       :limit, 
+                firstPage   :firstPage, 
+                lastPage    :lastPage
+            };
+
+            res.status(200).send({ yazarlar:yazarlar, meta:meta, message: 'Yazarlar Listelendi' });
         } catch (error) {
             res.status(500).send({ data: null, message: error.message });
         }
     }
 
+    yazarlariGetir2 = async (req, res) => {
+        try {
+            const orderby   = req.query.orderby || 'id';
+            const order     = req.query.order || 'ASC';
+            const limit     = parseInt(req.query.limit) || 10;
+            const search    = req.query.search || '';
+            const page      = parseInt(req.query.page) || 1;
+            const offset    = (page - 1) * limit;
+            
+            const result = await Yazar.findAndCountAll({
+                include: {
+                    model: Kitap,
+                },
+                order: [[orderby, order]],
+                distinct: true, // Kitapları sayarken tekrar eden yazarları saymamak için aksi taktirde fazla Çıkar sayı
+                limit:limit,
+                offset:offset,
+                distinct: true,
+                where: {
+                    [Op.or]: [
+                        { isim      : { [Op.like]: `%${search}%` } },
+                        { biyografi : { [Op.like]: `%${search}%` } },
+                    ]
+                },
+            });
+
+            const yazarlar = result.rows || [];
+            const total = result.count || 0;
+
+            const firstPage = total === 0 ? 0 : 1;
+            const lastPage = Math.ceil(total / limit);
+
+            const meta = {
+                total       :total, 
+                page        :page, 
+                limit       :limit, 
+                firstPage   :firstPage, 
+                lastPage    :lastPage
+            };
+
+            res.status(200).send({ yazarlar:yazarlar, meta:meta, message: 'Yazarlar Listelendi' });
+        } catch (error) {
+            res.status(500).send({ data: null, message: error.message });
+        }
+    }
     yazarGetir = async (req, res) => {
         try {
             const yazar = await Yazar.findOne({ where: { id: req.params.id } });

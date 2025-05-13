@@ -1,3 +1,9 @@
+/**
+ * Notlar
+ * - 'as' anahtar kelimesi için olan notu mutlaka ekle
+ * - Üstteki maddeyi halledince buraya kadarki kısmı nota ekle
+ * - Düzgün filtrelemeli Yazar ve Kitap controllerlarını döküme et
+ */
 const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
@@ -7,8 +13,9 @@ const KitapRoute  = require('./routes/KitapRoute');
 const UserRoute = require('./routes/UserRoute');
 const YazarRoute = require('./routes/YazarRoute');
 const GenelRoute = require('./routes/GenelRoutes');
+const KategoriRoute = require('./routes/KategoriRoutes');
 
-const User = require('./models/User');
+const Kategori = require('./models/Kategori');
 const Yazar = require('./models/Yazar');
 const Kitap = require('./models/Kitap');
 
@@ -24,11 +31,18 @@ app.use((req, res, next) => {
 
 //*******************************************************/
 // Modellerin birbirleriyle olan ilişkilerini tanımlıyoruz
-Yazar.hasMany(Kitap, { onDelete: 'CASCADE', foreignKey: {name:'yazarId', allowNull:false} });
+Yazar.hasMany(Kitap, { onDelete: 'CASCADE', foreignKey: {allowNull:false, name:'yazarId'} }); // allowNull:false olduğu için yazarId boş olamaz
 // Bir yazarın birden fazla kitabı olabilir
-Kitap.belongsTo(Yazar, { foreignKey: {name:'yazarId', allowNull:false} });
+Kitap.belongsTo(Yazar, { foreignKey: { name:'yazarId' }, as:'yazar' }); // allowNull:false olduğu için yazarId boş olamaz
 // Bir kitabın bir yazarı olabilir
 //*******************************************************/
+
+// *******************************************************/
+// Kitap ve Kategori arasındaki ÇOKA ÇOK ilişkiyi tanımlıyoruz
+Kitap.belongsToMany(Kategori, { through: 'pivot_kategori_kitap', foreignKey: 'kitapId', as: 'kategoriler' });
+Kategori.belongsToMany(Kitap, { through: 'pivot_kategori_kitap', foreignKey: 'kategoriId', as: 'kitaplar' });
+// (!) Foreign keylere dikkat edilmeli (!)
+// ********************************************************/
 
 
 sequelize.sync({force:false})
@@ -40,6 +54,7 @@ sequelize.sync({force:false})
             app.use('/kitap', KitapRoute);
             app.use('/user', UserRoute);
             app.use('/yazar', YazarRoute);
+            app.use('/kategori', KategoriRoute);
         
             app.use((req, res, next) => {
                 res.status(404).send({ message: 'Not Found' });
