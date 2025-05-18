@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="tr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Title</title>
+    </head>
+    <body>
+        <h3>Bağlantılar:</h3>
+        <ul id="liste">
+
+        </ul>
+
+    </body>
+
+        <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+        
+        <script>
+            
+        const liste = document.getElementById('liste');
+
+        // Sunucuya bağlan
+        const socket = io('http://localhost:8081'); // Portunu kendi sunucuna göre ayarla
+
+        socket.on('connection', () => {
+            console.log('Sunucuya bağlandı! Soket ID:', socket.id);
+            liste.insertAdjacentElement('beforeend', `<li>Bağlantı ID: ${socket.id}</li>`);
+        });
+
+        // Örnek: Sunucudan gelen bir mesajı dinle
+        socket.on('mesaj', (data) => {
+            console.log('Sunucudan gelen mesaj:', data);
+        });
+    </script>
+</html>

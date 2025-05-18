@@ -18,6 +18,7 @@
     "nodemailer": "^6.10.0",
     "nodemailer-sendgrid-transport": "^0.2.0",
     "sequelize": "^6.37.7",
+    "socket.io": "^4.8.1",
     "undici-types": "^6.20.0"
   },
   "devDependencies": {

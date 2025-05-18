@@ -1,7 +1,6 @@
 const { Op } = require("sequelize");
 const Yazar = require("../models/Yazar");
 const Kitap = require("../models/Kitap");
-const e = require("express");
 
 class YazarController {
 
@@ -92,7 +91,6 @@ class YazarController {
                 distinct: true, // Kitapları sayarken tekrar eden yazarları saymamak için aksi taktirde fazla Çıkar sayı
                 limit:limit,
                 offset:offset,
-                distinct: true,
                 where: {
                     [Op.or]: [
                         { isim      : { [Op.like]: `%${search}%` } },
@@ -120,6 +118,7 @@ class YazarController {
             res.status(500).send({ data: null, message: error.message });
         }
     }
+
     yazarGetir = async (req, res) => {
         try {
             const yazar = await Yazar.findOne({ where: { id: req.params.id } });
