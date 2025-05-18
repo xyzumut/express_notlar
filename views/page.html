@@ -1,35 +1,40 @@
 <!DOCTYPE html>
 <html lang="tr">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Title</title>
-    </head>
-    <body>
-        <h3>Bağlantılar:</h3>
-        <ul id="liste">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Socket Sayaç</title>
+</head>
+<body>
+    <h3>Bağlantılar:</h3>
+    <ul id="liste"></ul>
 
-        </ul>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script>
+        const socket = io();
 
-    </body>
+        let myId = null;
 
-        <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-        
-        <script>
-            
-        const liste = document.getElementById('liste');
-
-        // Sunucuya bağlan
-        const socket = io('http://localhost:8081'); // Portunu kendi sunucuna göre ayarla
-
-        socket.on('connection', () => {
-            console.log('Sunucuya bağlandı! Soket ID:', socket.id);
-            liste.insertAdjacentElement('beforeend', `<li>Bağlantı ID: ${socket.id}</li>`);
+        // Sayaçlar güncellendiğinde
+        socket.on('counters', (counters) => {
+            const liste = document.getElementById('liste');
+            liste.innerHTML = '';
+            Object.entries(counters).forEach(([id, count]) => {
+                const li = document.createElement('li');
+                const btn = document.createElement('button');
+                btn.textContent = `Buton (${count})`;
+                btn.disabled = (id !== myId); // Sadece kendi butonun aktif
+                btn.onclick = () => socket.emit('increment');
+                li.appendChild(btn);
+                li.appendChild(document.createTextNode(' ' + id));
+                liste.appendChild(li);
+            });
         });
 
-        // Örnek: Sunucudan gelen bir mesajı dinle
-        socket.on('mesaj', (data) => {
-            console.log('Sunucudan gelen mesaj:', data);
+        // Kendi socket id'mizi öğrenmek için
+        socket.on('connect', () => {
+            myId = socket.id;
         });
     </script>
+</body>
 </html>

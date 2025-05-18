@@ -74,14 +74,24 @@ sequelize.sync({force:false})
             }
         });
 
+        const userCounters = {}; // socket.id -> sayaç
+
         io.on('connection', (socket) => {
+            // Her yeni kullanıcı için sayaç başlat
+            userCounters[socket.id] = 0;
 
-            console.log(socket)
+            // Tüm kullanıcılara güncel sayaçları gönder
+            io.emit('counters', userCounters);
 
-            console.log('Yeni bir istemci bağlandı:', socket.id);
-            
+            // Butona basılınca
+            socket.on('increment', () => {
+                userCounters[socket.id] = (userCounters[socket.id] || 0) + 1;
+                io.emit('counters', userCounters); // Herkese güncel sayaçları gönder
+            });56
+
             socket.on('disconnect', () => {
-                console.log('İstemci bağlantısı kesildi:', socket.id);
+                delete userCounters[socket.id];
+                io.emit('counters', userCounters); // Herkese güncel sayaçları gönder
             });
         });
 
